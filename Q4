@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+void toUpperCase(char* str) {
+    for (int i = 0; str[i]; ++i) str[i] = toupper(str[i]);
+}
+
+void generateKey(char* text, char* key, char* newKey) {
+    int textLen = strlen(text), keyLen = strlen(key), i, j;
+    for (i = 0, j = 0; i < textLen; ++i, ++j) {
+        if (j == keyLen) j = 0;
+        newKey[i] = key[j];
+    }
+    newKey[i] = '\0';
+}
+
+void vigenereCipher(char* text, char* key, char* result) {
+    int textLen = strlen(text);
+    for (int i = 0; i < textLen; ++i) {
+        if (isalpha(text[i])) {
+            char offset = isupper(text[i]) ? 'A' : 'a';
+            result[i] = (text[i] - offset + (toupper(key[i]) - 'A')) % 26 + offset;
+        } else {
+            result[i] = text[i];
+        }
+    }
+    result[textLen] = '\0';
+}
+
+int main() {
+    char text[100], key[100], newKey[100], result[100];
+
+    printf("Enter the plaintext: ");
+    fgets(text, sizeof(text), stdin);
+    text[strcspn(text, "\n")] = '\0';
+    toUpperCase(text);
+
+    printf("Enter the keyword: ");
+    fgets(key, sizeof(key), stdin);
+    key[strcspn(key, "\n")] = '\0';
+    toUpperCase(key);
+
+    generateKey(text, key, newKey);
+    vigenereCipher(text, newKey, result);
+
+    printf("Encrypted text: %s\n", result);
+
+    return 0;
+}
