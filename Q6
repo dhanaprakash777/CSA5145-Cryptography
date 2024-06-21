@@ -1,0 +1,64 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+// Function to calculate gcd of two numbers
+int gcd(int a, int b) {
+    while (b != 0) {
+        int temp = b;
+        b = a % b;
+        a = temp;
+    }
+    return a;
+}
+
+// Function to find multiplicative inverse of a under modulo m
+int modInverse(int a, int m) {
+    a = a % m;
+    for (int x = 1; x < m; x++)
+        if ((a * x) % m == 1)
+            return x;
+    return 1;
+}
+
+// Function to decrypt using Affine Cipher
+void affineDecrypt(char* text, int a, int b, char* result) {
+    int a_inv = modInverse(a, 26);
+    for (int i = 0; text[i] != '\0'; ++i) {
+        if (isalpha(text[i])) {
+            char offset = isupper(text[i]) ? 'A' : 'a';
+            result[i] = (char) (((a_inv * ((text[i] - offset) - b + 26)) % 26) + offset);
+        } else {
+            result[i] = text[i];
+        }
+    }
+    result[strlen(text)] = '\0';
+}
+
+int main() {
+    char ciphertext[] = "BUBUBUBUBUBUBUBUBUBUBUBUBUBUBUBUBUBUBUBUBUBUBUBUBUBUBUBUBUBUBUBUB";
+    char plaintext[100];
+
+    // Frequency analysis from the given ciphertext
+    char mostFrequent = 'B'; // Most frequent letter
+    char secondMostFrequent = 'U'; // Second most frequent letter
+
+    // Determine a and b using the known plaintext-ciphertext pairs
+    // B -> E (4) and U -> T (19)
+    // a = (E - T) * (B - U)^(-1) % 26
+    // b = E - a * B % 26
+
+    int E = 'E' - 'A'; // 4
+    int T = 'T' - 'A'; // 19
+    int B = mostFrequent - 'A';
+    int U = secondMostFrequent - 'A';
+
+    int a = (E - T + 26) % 26 * modInverse(B - U + 26, 26) % 26;
+    int b = (E - a * B + 26) % 26;
+
+    affineDecrypt(ciphertext, a, b, plaintext);
+
+    printf("Decrypted plaintext: %s\n", plaintext);
+
+    return 0;
+}
