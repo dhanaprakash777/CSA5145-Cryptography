@@ -1,0 +1,83 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define ALPHABET_SIZE 26
+
+void findPosition(char matrix[5][5], char ch, int *row, int *col) {
+    if (ch == 'J')
+        ch = 'I';
+
+    for (*row = 0; *row < 5; (*row)++) {
+        for (*col = 0; *col < 5; (*col)++) {
+            if (matrix[*row][*col] == ch) {
+                return;
+            }
+        }
+    }
+}
+
+void decryptPlayfair(char ciphertext[], char plaintext[], char key[]) {
+    char matrix[5][5];
+    int used[ALPHABET_SIZE] = {0};
+    int keyIndex = 0, row, col;
+    int i, j, k = 0;
+
+    // Create the Playfair matrix
+    for (i = 0; i < 5; i++) {
+        for (j = 0; j < 5; j++) {
+            char currentChar = key[keyIndex++];
+            if (currentChar == 'J')
+                currentChar = 'I';
+
+            while (used[currentChar - 'A']) {
+                currentChar++;
+                if (currentChar > 'Z')
+                    currentChar = 'A';
+            }
+
+            matrix[i][j] = currentChar;
+            used[currentChar - 'A'] = 1;
+        }
+    }
+
+    // Decrypt the ciphertext
+    for (i = 0; i < strlen(ciphertext); i += 2) {
+        char first = ciphertext[i];
+        char second = ciphertext[i + 1];
+
+        if (first == 'J')
+            first = 'I';
+        if (second == 'J')
+            second = 'I';
+
+        int row1, col1, row2, col2;
+        findPosition(matrix, first, &row1, &col1);
+        findPosition(matrix, second, &row2, &col2);
+
+        if (row1 == row2) {
+            plaintext[k++] = matrix[row1][(col1 + 4) % 5];
+            plaintext[k++] = matrix[row2][(col2 + 4) % 5];
+        } else if (col1 == col2) {
+            plaintext[k++] = matrix[(row1 + 4) % 5][col1];
+            plaintext[k++] = matrix[(row2 + 4) % 5][col2];
+        } else {
+            plaintext[k++] = matrix[row1][col2];
+            plaintext[k++] = matrix[row2][col1];
+        }
+    }
+    plaintext[k] = '\0';
+}
+
+int main() {
+    char key[] = "PLAYFAIRKEY";
+    char ciphertext[] = "KXJEY UREBE ZWEHE WRYTU HEYFS KREHE GOYFI WTTTU OLKSY CAJPO BOTEI ZONTX BYBNT GONEY CUZWR GDSON SXBOU YWRHE BAAHY USEDQ";
+    char plaintext[1000];
+
+    decryptPlayfair(ciphertext, plaintext, key);
+
+    printf("Ciphertext: %s\n", ciphertext);
+    printf("Decrypted plaintext: %s\n", plaintext);
+
+    return 0;
+}
