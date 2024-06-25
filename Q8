@@ -1,0 +1,62 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+#define ALPHABET_LENGTH 26
+
+void generateCipherAlphabet(char keyword[], char cipherAlphabet[]) {
+    int keywordLength = strlen(keyword);
+    int i, j;
+
+    memset(cipherAlphabet, 0, ALPHABET_LENGTH);
+
+    for (i = 0; i < keywordLength; i++) {
+        char currentChar = toupper(keyword[i]);
+        if (cipherAlphabet[currentChar - 'A'] == 0) {
+            cipherAlphabet[currentChar - 'A'] = currentChar;
+        }
+    }
+
+    j = 0;
+    for (i = 0; i < ALPHABET_LENGTH; i++) {
+        if (cipherAlphabet[i] == 0) {
+            char normalChar = 'A' + j;
+            while (strchr(keyword, normalChar) != NULL) {
+                normalChar++;
+            }
+            cipherAlphabet[i] = normalChar;
+            j++;
+        }
+    }
+}
+
+void encryptMessage(char plaintext[], char ciphertext[], char cipherAlphabet[]) {
+    int i;
+    int length = strlen(plaintext);
+
+    for (i = 0; i < length; i++) {
+        if (isalpha(plaintext[i])) {
+            char originalChar = toupper(plaintext[i]);
+            ciphertext[i] = isupper(plaintext[i]) ? cipherAlphabet[originalChar - 'A'] :
+                                                     tolower(cipherAlphabet[originalChar - 'A']);
+        } else {
+            ciphertext[i] = plaintext[i];
+        }
+    }
+    ciphertext[length] = '\0';
+}
+
+int main() {
+    char keyword[] = "CIPHER";
+    char plaintext[] = "Hello, World!";
+    char cipherAlphabet[ALPHABET_LENGTH];
+    char ciphertext[100];
+
+    generateCipherAlphabet(keyword, cipherAlphabet);
+    encryptMessage(plaintext, ciphertext, cipherAlphabet);
+
+    printf("Plaintext: %s\n", plaintext);
+    printf("Ciphertext: %s\n", ciphertext);
+
+    return 0;
+}
